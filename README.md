@@ -15,6 +15,8 @@ Current version is tested and works with:
 - Working menus for changing main analog domain and digital domain configurations, not yet sent back to the VUHFRadio module
 - Display last CAT command sent and return status
 
+Detailed explanation on the RadioInterface Module and its usage: www.notblackmagic.com/projects/radio-interface/
+
 ## File Organization
 
 **src/HAL:** MCU peripheral drivers, custom HALs
