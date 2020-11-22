@@ -25,6 +25,6 @@ Detailed explanation on the RadioInterface Module and its usage: www.notblackmag
 
 **src/gui.c:** GUI Interface
 
-**src/Radio/CATInterface.c:** CAT Command Handler and interpreter functions (The other files are deprecated and will be phased out)
+**src/Radio/CATInterface.c:** CAT Command Handler and interpreter functions
 
 **include/configs.c:** Radio configurations save files
