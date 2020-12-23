@@ -37,7 +37,7 @@ uint8_t CATInterfaceHandler(uint8_t* data, uint16_t dataLength, uint8_t* rData, 
 		//AFC Control
 		return CATCommandAFCControl(data, dataLength, rData, rDataLength);
 	}
-	else if(data[0] == 'C' && data[1] == 'R') {
+	else if(data[0] == 'C' && data[1] == 'T') {
 		//CRC/CCITT Control
 		return CATCommandCRC(data, dataLength, rData, rDataLength);
 	}

@@ -13,13 +13,15 @@
 
 #define BUTTON_SWITCH						3
 #define BUTTON_FREQ							4
-#define BUTTON_ENTER						1
+#define BUTTON_MENU							1
 #define BUTTON_BACK							2
 #define BUTTON_UP							0
 #define BUTTON_DOWN							6
 #define BUTTON_LEFT							8
 #define BUTTON_RIGHT						5
 #define BUTTON_CENTER						7
+
+extern volatile uint8_t selectedRadio;
 
 typedef struct {
 	//Button Status

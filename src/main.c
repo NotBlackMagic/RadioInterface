@@ -15,6 +15,7 @@
 
 void RadioConfigInit();
 
+//Comercial: 97400000; RFM: 93200000; Mega Hits: 92400000
 int main(void) {
 	//Configure the system clock
 	SystemClockInit();
@@ -37,6 +38,7 @@ int main(void) {
 	SetBackgroundColor(Colors666.black);
 
 	//Init/get initial radio configurations
+	selectedRadio = RADIO_B;
 	RadioConfigInit();
 
 	//Init Main Screen
@@ -88,6 +90,25 @@ int main(void) {
 			DigitalBarUpdate(0x00);
 		}
 
+		if(ReadButtonState(BUTTON_SWITCH) == 0x01) {
+			if(selectedRadio == RADIO_A) {
+				selectedRadio = RADIO_B;
+
+				//"Clear"/Update Screen
+				MainScreenDraw();
+				AnalogBarInit(0x00);
+				DigitalBarInit(0x00);
+			}
+			else {
+				selectedRadio = RADIO_A;
+
+				//"Clear"/Update Screen
+				MainScreenDraw();
+				AnalogBarInit(0x00);
+				DigitalBarInit(0x00);
+			}
+		}
+
 		if(ReadButtonState(BUTTON_FREQ) == 0x01) {
 			analogBarSelected = 0x00;
 			digitalBarSelected = 0x00;
@@ -96,6 +117,10 @@ int main(void) {
 			DigitalBarUpdate(0x00);
 
 			CenterFrequencyUpDown();
+		}
+
+		if(ReadButtonState(BUTTON_MENU) == 0x01) {
+
 		}
 
 		if(analogBarSelected != 0x00) {
@@ -110,9 +135,8 @@ int main(void) {
 			if(requestDataIndex == 0x00) {
 				RSSIIndicatorUpdate();
 
-				txLength = sprintf(txData, "RM10;");		//Request RSSI Tracking Data
+				txLength = sprintf(txData, "RM%d0;", selectedRadio);		//Request RSSI Tracking Data
 				UART1Write(txData, txLength);
-
 				CommandBarUpdateCmd(txData);
 
 				requestDataIndex = 0x01;
@@ -120,9 +144,8 @@ int main(void) {
 			else if(requestDataIndex == 0x01) {
 				FrequencyTrackingUpdate();
 
-				txLength = sprintf(txData, "RM11;");		//Request RF Frequency Tracking Data
+				txLength = sprintf(txData, "RM%d1;", selectedRadio);		//Request RSSI Tracking Data
 				UART1Write(txData, txLength);
-
 				CommandBarUpdateCmd(txData);
 
 				requestDataIndex = 0x00;
@@ -141,15 +164,137 @@ void RadioConfigInit() {
 	uint16_t txLength = 0;
 
 	//Init configurations for Radio A (UHF)
-
-	//Init configurations for Radio B (VHF)
+	uint8_t run = 0x01;
 	uint8_t config = 0;
-	while(config < 0x12) {
+	while(run == 0x01) {
 		//UART Communication Check
 		if(UART1Read(rxData, &rxLength) == 0x01) {
 			uint8_t cmdError = CATInterfaceHandler(rxData, rxLength, txData, &txLength);
 
 			cmdResponse = 1;
+
+			if(config == 0x13) {
+				run = 0x00;
+			}
+		}
+
+		if(cmdResponse == 0x01) {
+			//Got answer, request next
+			switch(config) {
+				case 0x00:
+					//Get configuration: operationModeA
+					txLength = sprintf(txData, "FT0;");
+					break;
+				case 0x01:
+					//Get configuration: operationModeA
+					txLength = sprintf(txData, "FR0;");
+					break;
+				case 0x02:
+					//Get configuration: centerFrequencyA
+					txLength = sprintf(txData, "FA;");
+					break;
+				case 0x03:
+					//Get configuration: modulationA
+					txLength = sprintf(txData, "MD0;");
+					break;
+				case 0x04:
+					//Get configuration: ifFrequncyA
+					txLength = sprintf(txData, "IS0;");
+					break;
+				case 0x05:
+					//Get configuration: bandwidthA
+					txLength = sprintf(txData, "SH0;");
+					break;
+				case 0x06:
+					//Get configuration: rxDatarateA
+					txLength = sprintf(txData, "DR0;");
+					break;
+				case 0x07:
+					//Get configuration: txDatarateA
+					txLength = sprintf(txData, "DT0;");
+					break;
+				case 0x08:
+					//Get configuration: afcRangeA
+					txLength = sprintf(txData, "AF0;");
+					break;
+				case 0x09:
+					//Get configuration: outputPowerA
+					txLength = sprintf(txData, "PC0;");
+					break;
+				case 0x0A:
+					//Get configuration: agcSpeedA
+					txLength = sprintf(txData, "GT0;");
+					break;
+				case 0x0B:
+					//Get configuration: frequencyDeviationA
+//					txLength = sprintf(txData, "SH0;");
+					frequencyDeviationB = 4800;
+					txLength = 0;
+					break;
+				case 0x0C:
+					//Get configuration: afskSpaceA
+//					txLength = sprintf(txData, "SH0;");
+					afskSpaceB = 2200;
+					txLength = 0;
+					break;
+				case 0x0D:
+					//Get configuration: afskMarkA
+//					txLength = sprintf(txData, "SH0;");
+					afskMarkB = 1200;
+					txLength = 0;
+					break;
+				case 0x0E:
+					//Get configuration: afskDetectorBWA
+//					txLength = sprintf(txData, "SH0;");
+					afskDetectorBWB = 4800;
+					txLength = 0;
+					break;
+				case 0x0F:
+					//Get configuration: morseSpeedA
+//					txLength = sprintf(txData, "SH0;");
+					morseSpeedB = 0;
+					txLength = 0;
+					break;
+				case 0x10:
+					//Get configuration: encoderA
+					txLength = sprintf(txData, "EM0;");
+					break;
+				case 0x11:
+					//Get configuration: framingA
+					txLength = sprintf(txData, "FM0;");
+					break;
+				case 0x12:
+					//Get configuration: crcA
+					txLength = sprintf(txData, "CT0;");
+					break;
+				default:
+					txLength = 0;
+					break;
+			}
+
+			config += 1;
+
+			if(txLength > 0) {
+				UART1Write(txData, txLength);
+
+				cmdResponse = 0x00;
+			}
+		}
+	}
+
+	//Init configurations for Radio B (VHF)
+	run = 0x01;
+	config = 0;
+	while(run == 0x01) {
+		//UART Communication Check
+		if(UART1Read(rxData, &rxLength) == 0x01) {
+			uint8_t cmdError = CATInterfaceHandler(rxData, rxLength, txData, &txLength);
+
+			cmdResponse = 1;
+
+			if(config == 0x13) {
+				run = 0x00;
+			}
 		}
 
 		if(cmdResponse == 0x01) {

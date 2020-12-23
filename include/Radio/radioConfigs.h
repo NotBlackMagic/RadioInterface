@@ -10,6 +10,9 @@ extern "C" {
 #define RADIO_A										0
 #define RADIO_B										1
 
+#define RADIO_UHF									0
+#define RADIO_VHF									1
+
 #define RADIO_RSSI_THRESHOLD						-90		//Radio RSSI activity threshold, above this level channel activity is assumed (for Morse and LED indication)
 
 typedef enum {
