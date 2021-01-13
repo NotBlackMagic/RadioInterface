@@ -5,8 +5,10 @@ This is the firmware for an GUI Interface Add-on module for the VUHFRadio Module
 Some characteristics of this firmware:
 - Custom TFT Screen drivers for the ILI9341 over SPI
 - Custom 2D Library to draw basic shapes and text
+- Custom AX.25 decoding/encode library
 - The MCU used is an STM32F103 and this firmware uses the LL Library
 - Command interface to the VUHFRadio module uses the CAT command interface used in the VUHRadio Module over a private UART interface
+- TNC style interface to the VUHFRadio uses the KISS protocol
 
 Current version is tested and works with:
 - For now only works with one of the Radio/Transceiver channels, the VHF
@@ -14,6 +16,7 @@ Current version is tested and works with:
 - Update and display RSSI and RF Frequency tracking variables
 - Working menus for changing main analog domain and digital domain configurations, not yet sent back to the VUHFRadio module
 - Display last CAT command sent and return status
+- Decode and display AX.25 frames received from the VUHFRadio Module over the KISS protocol
 
 Detailed explanation on the RadioInterface Module and its usage: www.notblackmagic.com/projects/radio-interface/
 
@@ -26,5 +29,7 @@ Detailed explanation on the RadioInterface Module and its usage: www.notblackmag
 **src/gui.c:** GUI Interface
 
 **src/Radio/CATInterface.c:** CAT Command Handler and interpreter functions
+
+**src/Radio/ax25.c** AX25 encode and decode library
 
 **include/configs.c:** Radio configurations save files

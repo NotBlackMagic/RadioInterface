@@ -2,8 +2,8 @@
 
 #define UART_WRITE_TIMEOUT									1000	//Timeout to wait for TX Buffer empty in ms
 
-#define UART_RX_BUFFER_SIZE									128
-#define UART_TX_BUFFER_SIZE									128
+#define UART_RX_BUFFER_SIZE									255
+#define UART_TX_BUFFER_SIZE									255
 
 uint16_t uart1RXBufferIndex;
 uint16_t uart1RXBufferLength;

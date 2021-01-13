@@ -9,6 +9,9 @@
 #include "3DRenderer.h"
 #include "gui.h"
 
+#include "ax25.h"
+#include "tnc.h"
+
 #include "pinMaping.h"
 
 #include "stdio.h"
@@ -56,6 +59,31 @@ int main(void) {
 	//Draw Bottom Menu Row
 	BottomButtonLabelsInit();
 
+//	uint8_t testPayload[255];
+//	AX25Struct message;
+//	message.sourceAddress[0] = 'C';
+//	message.sourceAddress[1] = 'S';
+//	message.sourceAddress[2] = '5';
+//	message.sourceAddress[3] = 'C';
+//	message.sourceAddress[4] = 'E';
+//	message.sourceAddress[5] = 'P';
+//	message.sourceAddress[6] = '1';
+//	message.sourceAddress[7] = 0x00;
+//	message.destinationAddress[0] = 'I';
+//	message.destinationAddress[1] = 'S';
+//	message.destinationAddress[2] = 'T';
+//	message.destinationAddress[3] = 'S';
+//	message.destinationAddress[4] = 'A';
+//	message.destinationAddress[5] = 'T';
+//	message.destinationAddress[6] = '1';
+//	message.destinationAddress[7] = 0x00;
+//	message.control = 0x04;
+//	message.pid = 0x02;
+//	message.payload = testPayload;
+//	sprintf(message.payload, "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
+//	message.payloadLength = strlen(message.payload);
+//	MessageWindowUpdate(message);
+
 	uint8_t analogBarSelected = 0;
 	uint8_t digitalBarSelected = 0;
 
@@ -70,9 +98,52 @@ int main(void) {
 	while(1) {
 		//UART Communication Check
 		if(UART1Read(rxData, &rxLength) == 0x01) {
-			cmdError = CATInterfaceHandler(rxData, rxLength, txData, &txLength);
-//			UART1Write(txData, txLength);
-			CommandBarUpdateCmdReturn(cmdError);
+			//Check if is a KISS packet/frame/command, always start with FEND (0xC0)
+			if(rxData[0] == FEND) {
+				//This is a KISS packet
+				KissCmd kissCmd = rxData[1] & KISS_COMMAND_MASK;		//Extract the Command bits
+				uint8_t kissPort = (rxData[1] & KISS_PORT_MASK) >> 4;	//Extract the Port bits
+
+				if(kissCmd == DataFrame) {
+					//This is a KISS data Frame
+					uint8_t rxRadioDataLength = 0;
+					uint8_t rxRadioData[255];
+
+					//Extract the KISS Frame to send over Radio
+					uint8_t i = 2;
+					while(i < rxLength) {
+						if(rxData[i] == FEND) {
+							//Frame end
+							break;
+						}
+						rxRadioData[rxRadioDataLength++] = rxData[i++];
+					}
+
+					//Convert to AX25 message
+					uint8_t ax25Payload[255];
+					AX25Struct ax25Message;
+					ax25Message.payload = ax25Payload;
+					AX25Decode(rxRadioData, rxRadioDataLength, &ax25Message);
+
+					//Write to correct Radio Window
+					if(kissPort == RADIO_A) {
+						if(selectedRadio == RADIO_A) {
+							MessageWindowUpdate(ax25Message);
+						}
+					}
+					else if(kissPort == RADIO_B) {
+						if(selectedRadio == RADIO_B) {
+							MessageWindowUpdate(ax25Message);
+						}
+					}
+				}
+			}
+			else {
+				//Not a KISS packet so check as CAT command
+				cmdError = CATInterfaceHandler(rxData, rxLength, txData, &txLength);
+	//			UART1Write(txData, txLength);
+				CommandBarUpdateCmdReturn(cmdError);
+			}
 		}
 
 		if(ReadButtonState(BUTTON_DOWN) == 0x01) {
@@ -228,31 +299,31 @@ void RadioConfigInit() {
 				case 0x0B:
 					//Get configuration: frequencyDeviationA
 //					txLength = sprintf(txData, "SH0;");
-					frequencyDeviationB = 4800;
+					radioAConfig.frequencyDeviation = 4800;
 					txLength = 0;
 					break;
 				case 0x0C:
 					//Get configuration: afskSpaceA
 //					txLength = sprintf(txData, "SH0;");
-					afskSpaceB = 2200;
+					radioAConfig.afskSpace = 2200;
 					txLength = 0;
 					break;
 				case 0x0D:
 					//Get configuration: afskMarkA
 //					txLength = sprintf(txData, "SH0;");
-					afskMarkB = 1200;
+					radioAConfig.afskMark = 1200;
 					txLength = 0;
 					break;
 				case 0x0E:
 					//Get configuration: afskDetectorBWA
 //					txLength = sprintf(txData, "SH0;");
-					afskDetectorBWB = 4800;
+					radioAConfig.afskDetectorBW = 4800;
 					txLength = 0;
 					break;
 				case 0x0F:
 					//Get configuration: morseSpeedA
 //					txLength = sprintf(txData, "SH0;");
-					morseSpeedB = 0;
+					radioAConfig.morseSpeed = 0;
 					txLength = 0;
 					break;
 				case 0x10:
@@ -347,31 +418,31 @@ void RadioConfigInit() {
 				case 0x0B:
 					//Get configuration: frequencyDeviationB
 //					txLength = sprintf(txData, "SH1;");
-					frequencyDeviationB = 4800;
+					radioBConfig.frequencyDeviation = 4800;
 					txLength = 0;
 					break;
 				case 0x0C:
 					//Get configuration: afskSpaceB
 //					txLength = sprintf(txData, "SH1;");
-					afskSpaceB = 2200;
+					radioBConfig.afskSpace = 2200;
 					txLength = 0;
 					break;
 				case 0x0D:
 					//Get configuration: afskMarkB
 //					txLength = sprintf(txData, "SH1;");
-					afskMarkB = 1200;
+					radioBConfig.afskMark = 1200;
 					txLength = 0;
 					break;
 				case 0x0E:
 					//Get configuration: afskDetectorBWB
 //					txLength = sprintf(txData, "SH1;");
-					afskDetectorBWB = 4800;
+					radioBConfig.afskDetectorBW = 4800;
 					txLength = 0;
 					break;
 				case 0x0F:
 					//Get configuration: morseSpeedB
 //					txLength = sprintf(txData, "SH1;");
-					morseSpeedB = 0;
+					radioBConfig.morseSpeed = 0;
 					txLength = 0;
 					break;
 				case 0x10:

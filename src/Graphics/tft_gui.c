@@ -234,12 +234,22 @@ void DrawASCIIText(Vector2D position, const char* text, uint8_t stringLength, ui
 	uint16_t x,y;
 	uint16_t length = stringLength*fontSize*8 + position.x;
 	uint8_t indexString = 0;
+	uint8_t fontIndex = 0;
 	uint8_t indexChar = 0;
 	uint8_t indexCol = 0;
 	uint8_t h,k;
 	k = 0;
 
 	SetPoint(position);
+
+	//Check if first char is a valid char
+	if(text[indexString] > 127 || text[indexString] < 32) {
+		//Not valid, substitute with a valid char placeholder
+		fontIndex = '#' - 32;
+	}
+	else {
+		fontIndex = (text[indexString] - 32);
+	}
 
 	for(x = position.x; x < length; x++) {
 		SetColumn(x);
@@ -248,7 +258,7 @@ void DrawASCIIText(Vector2D position, const char* text, uint8_t stringLength, ui
 
 		for(y = 0; y < 12; y++) {
 			for(h = 0; h < fontSize; h++) {
-				if((((font[(text[indexString]-32)][y]) & ( 1 << indexChar )) >> indexChar) == 1) {
+				if((((font[fontIndex][y]) & ( 1 << indexChar )) >> indexChar) == 1) {
 					TFT_Data(textColor.blue << 2);
 					TFT_Data(textColor.green << 2);
 					TFT_Data(textColor.red << 2);
@@ -271,6 +281,15 @@ void DrawASCIIText(Vector2D position, const char* text, uint8_t stringLength, ui
 			if(indexChar > 7) {
 				indexChar = 0;
 				indexString += 1;
+
+				//Check if next char is a valid char
+				if(text[indexString] > 127 || text[indexString] < 32) {
+					//Not valid, substitute with a valid char placeholder
+					fontIndex = '#' - 32;
+				}
+				else {
+					fontIndex = (text[indexString] - 32);
+				}
 			}
 		}
 	}

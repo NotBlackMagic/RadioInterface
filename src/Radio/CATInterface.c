@@ -164,10 +164,10 @@ uint8_t CATCommandAFCControl(uint8_t* data, uint16_t dataLength, uint8_t* rData,
 		}
 
 		if(radio == RADIO_A) {
-			afcRangeA = value;
+			radioAConfig.afcRange = value;
 		}
 		else if(radio == RADIO_B) {
-			afcRangeB = value;
+			radioBConfig.afcRange = value;
 		}
 	}
 	else {
@@ -212,10 +212,10 @@ uint8_t CATCommandCRC(uint8_t* data, uint16_t dataLength, uint8_t* rData, uint16
 		}
 
 		if(radio == RADIO_A) {
-			crcA = value;
+			radioAConfig.crc = value;
 		}
 		else if(radio == RADIO_B) {
-			crcB = value;
+			radioBConfig.crc = value;
 		}
 	}
 	else {
@@ -260,10 +260,10 @@ uint8_t CATCommandEncoding(uint8_t* data, uint16_t dataLength, uint8_t* rData, u
 		}
 
 		if(radio == RADIO_A) {
-			encoderA = value;
+			radioAConfig.encoder = value;
 		}
 		else if(radio == RADIO_B) {
-			encoderB = value;
+			radioBConfig.encoder = value;
 		}
 	}
 	else {
@@ -308,10 +308,10 @@ uint8_t CATCommandDatarateRX(uint8_t* data, uint16_t dataLength, uint8_t* rData,
 		}
 
 		if(radio == RADIO_A) {
-			rxDatarateA = value;
+			radioAConfig.rxDatarate = value;
 		}
 		else if(radio == RADIO_B) {
-			rxDatarateB = value;
+			radioBConfig.rxDatarate = value;
 		}
 	}
 	else {
@@ -356,10 +356,10 @@ uint8_t CATCommandDatarateTX(uint8_t* data, uint16_t dataLength, uint8_t* rData,
 		}
 
 		if(radio == RADIO_A) {
-			txDatarateA = value;
+			radioAConfig.txDatarate = value;
 		}
 		else if(radio == RADIO_B) {
-			txDatarateB = value;
+			radioBConfig.txDatarate = value;
 		}
 	}
 	else {
@@ -392,7 +392,7 @@ uint8_t CATCommandCenterFequencyA(uint8_t* data, uint16_t dataLength, uint8_t* r
 			return 1;
 		}
 
-		centerFrequencyA = value;
+		radioAConfig.centerFrequency = value;
 	}
 	else {
 		//Syntax Error
@@ -424,7 +424,7 @@ uint8_t CATCommandCenterFequencyB(uint8_t* data, uint16_t dataLength, uint8_t* r
 			return 1;
 		}
 
-		centerFrequencyB = value;
+		radioBConfig.centerFrequency = value;
 	}
 	else {
 		//Syntax Error
@@ -468,10 +468,10 @@ uint8_t CATCommandFraming(uint8_t* data, uint16_t dataLength, uint8_t* rData, ui
 		}
 
 		if(radio == RADIO_A) {
-			framingA = value;
+			radioAConfig.framing = value;
 		}
 		else if(radio == RADIO_B) {
-			framingB = value;
+			radioBConfig.framing = value;
 		}
 	}
 	else {
@@ -518,20 +518,20 @@ uint8_t CATCommandFunctionRX(uint8_t* data, uint16_t dataLength, uint8_t* rData,
 		if(radio == RADIO_A) {
 			if(value == 0x01) {
 				//Check if is AFSK mode, if yes change AFSK register because have different meaning in RX or TX
-				if(modulationA == 0x03) {
+				if(radioAConfig.modulation == RadioModulation_AFSK) {
 
 				}
 			}
-			operationModeA = value;
+			radioAConfig.operationMode = value;
 		}
 		else if(radio == RADIO_B) {
 			if(value == 0x01) {
 				//Check if is AFSK mode, if yes change AFSK register because have different meaning in RX or TX
-				if(modulationB == 0x03) {
+				if(radioBConfig.modulation == RadioModulation_AFSK) {
 
 				}
 			}
-			operationModeB = value;
+			radioBConfig.operationMode = value;
 		}
 	}
 	else {
@@ -577,13 +577,13 @@ uint8_t CATCommandFunctionTX(uint8_t* data, uint16_t dataLength, uint8_t* rData,
 
 		if(radio == RADIO_A) {
 			if(value == 0x00) {
-				operationModeA = 0x00;
+				radioAConfig.operationMode = RadioMode_OFF;
 			}
 			else if(value == 0x01) {
-				operationModeA = 0x02;
+				radioAConfig.operationMode = RadioMode_TX;
 
 				//Check if is AFSK mode, if yes change AFSK register because have different meaning in RX or TX
-				if(modulationA == 0x03) {
+				if(radioAConfig.modulation == RadioModulation_AFSK) {
 
 				}
 			}
@@ -593,13 +593,13 @@ uint8_t CATCommandFunctionTX(uint8_t* data, uint16_t dataLength, uint8_t* rData,
 		}
 		else if(radio == RADIO_B) {
 			if(value == 0x00) {
-				operationModeB = 0x00;
+				radioBConfig.operationMode = RadioMode_OFF;
 			}
 			else if(value == 0x01) {
-				operationModeB = 0x02;
+				radioBConfig.operationMode = RadioMode_TX;
 
 				//Check if is AFSK mode, if yes change AFSK register because have different meaning in RX or TX
-				if(modulationA == 0x04) {
+				if(radioBConfig.modulation == RadioModulation_AFSK) {
 
 				}
 			}
@@ -650,10 +650,10 @@ uint8_t CATCommandAGCSpeed(uint8_t* data, uint16_t dataLength, uint8_t* rData, u
 		}
 
 		if(radio == RADIO_A) {
-			agcSpeedA = (15 - value);	//Inverted Logic: CAT 0-> OFF, Local 0-> Fastest
+			radioAConfig.agcSpeed = (15 - value);	//Inverted Logic: CAT 0-> OFF, Local 0-> Fastest
 		}
 		else if(radio == RADIO_B) {
-			agcSpeedB = (15 - value);	//Inverted Logic: CAT 0-> OFF, Local 0-> Fastest
+			radioBConfig.agcSpeed = (15 - value);	//Inverted Logic: CAT 0-> OFF, Local 0-> Fastest
 		}
 	}
 	else {
@@ -698,10 +698,10 @@ uint8_t CATCommandIFFrequency(uint8_t* data, uint16_t dataLength, uint8_t* rData
 		}
 
 		if(radio == RADIO_A) {
-			ifFrequncyA = value;
+			radioAConfig.ifFrequency = value;
 		}
 		else if(radio == RADIO_B) {
-			ifFrequncyB = value;
+			radioBConfig.ifFrequency = value;
 		}
 	}
 	else {
@@ -746,10 +746,10 @@ uint8_t CATCommandModulation(uint8_t* data, uint16_t dataLength, uint8_t* rData,
 		}
 
 		if(radio == RADIO_A) {
-			modulationA = value;
+			radioAConfig.modulation = value;
 		}
 		else if(radio == RADIO_B) {
-			modulationB = value;
+			radioBConfig.modulation = value;
 		}
 	}
 	else {
@@ -794,10 +794,10 @@ uint8_t CATCommandTXPower(uint8_t* data, uint16_t dataLength, uint8_t* rData, ui
 		}
 
 		if(radio == RADIO_A) {
-			outputPowerA = value;
+			radioAConfig.outputPower = (value - 10);
 		}
 		else if(radio == RADIO_B) {
-			outputPowerB = value;
+			radioBConfig.outputPower = (value - 10);
 		}
 	}
 	else {
@@ -842,10 +842,10 @@ uint8_t CATCommandBandwidth(uint8_t* data, uint16_t dataLength, uint8_t* rData, 
 		}
 
 		if(radio == RADIO_A) {
-			bandwidthA = value;
+			radioAConfig.bandwidth = value;
 		}
 		else if(radio == RADIO_B) {
-			bandwidthB = value;
+			radioBConfig.bandwidth = value;
 		}
 	}
 	else {
@@ -896,10 +896,10 @@ uint8_t CATCommandReadMeter(uint8_t* data, uint16_t dataLength, uint8_t* rData, 
 				value = -value;
 
 				if(radio == RADIO_A) {
-					rssiTrackingA = value;
+					radioATracking.rssiTracking = value;
 				}
 				else if(radio == RADIO_B) {
-					rssiTrackingB = value;
+					radioBTracking.rssiTracking = value;
 				}
 				else {
 					*rDataLength = sprintf(rData, "?;");
@@ -929,10 +929,10 @@ uint8_t CATCommandReadMeter(uint8_t* data, uint16_t dataLength, uint8_t* rData, 
 				}
 
 				if(radio == RADIO_A) {
-					rfFrequencyTrackingA = value;
+					radioATracking.rfFrequencyTracking = value;
 				}
 				else if(radio == RADIO_B) {
-					rfFrequencyTrackingB = value;
+					radioBTracking.rfFrequencyTracking = value;
 				}
 				else {
 					*rDataLength = sprintf(rData, "?;");
@@ -968,11 +968,11 @@ uint8_t CATCommandRSSI(uint8_t* data, uint16_t dataLength, uint8_t* rData, uint1
 	if(data[3] == ';') {
 		//Read Command
 		if(radio == RADIO_A) {
-			*rDataLength = sprintf(rData, "SM0%03d;", (-rssiTrackingA));
+			*rDataLength = sprintf(rData, "SM0%03d;", (-radioATracking.rssiTracking));
 			return 0;
 		}
 		else if(radio == RADIO_B) {
-			*rDataLength = sprintf(rData, "SM1%03d;", (-rssiTrackingB));
+			*rDataLength = sprintf(rData, "SM1%03d;", (-radioBTracking.rssiTracking));
 			return 0;
 		}
 		else {

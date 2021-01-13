@@ -7,6 +7,8 @@
 
 #include "tft_gui.h"
 
+#include "ax25.h"
+
 #include "radioConfigs.h"
 
 #define BUTTON_DEBOUNCE_TIMEOUT				250
@@ -61,6 +63,9 @@ uint8_t AnalogBarAction(uint8_t selected);
 void DigitalBarInit();
 void DigitalBarUpdate(uint8_t selected);
 uint8_t DigitalBarAction(uint8_t selected);
+
+void MessageWindowInit();
+void MessageWindowUpdate(AX25Struct message);
 
 void CommandBarInit();
 void CommandBarUpdateCmd(char* cmd);

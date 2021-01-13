@@ -349,10 +349,10 @@ void AnalogBarInit() {
 	radioModeList[1] = "RX";
 	radioModeList[2] = "TX";
 	if(selectedRadio == RADIO_A) {
-		strcpy(analogBarButtons[0].text, radioModeList[operationModeA]);
+		strcpy(analogBarButtons[0].text, radioModeList[radioAConfig.operationMode]);
 	}
 	else {
-		strcpy(analogBarButtons[0].text, radioModeList[operationModeB]);
+		strcpy(analogBarButtons[0].text, radioModeList[radioBConfig.operationMode]);
 	}
 
 	//Modulation Select Button
@@ -380,10 +380,10 @@ void AnalogBarInit() {
 	modulationModeList[7] = "BPSK";
 	modulationModeList[8] = "QPSK";
 	if(selectedRadio == RADIO_A) {
-		strcpy(analogBarButtons[1].text, modulationModeList[modulationA - 1]);
+		strcpy(analogBarButtons[1].text, modulationModeList[radioAConfig.modulation - 1]);
 	}
 	else {
-		strcpy(analogBarButtons[1].text, modulationModeList[modulationB - 1]);
+		strcpy(analogBarButtons[1].text, modulationModeList[radioBConfig.modulation - 1]);
 	}
 
 
@@ -426,10 +426,10 @@ void AnalogBarInit() {
 	agcSpeedList[4] = "AGC SLOW";		//AGC Speed: 9 -> 311Hz
 	agcSpeedList[5] = "AGC OFF";		//AGC Off: 15 -> Off
 	if(selectedRadio == RADIO_A) {
-		strcpy(analogBarButtons[3].text, agcSpeedList[agcSpeedToList[agcSpeedA]]);
+		strcpy(analogBarButtons[3].text, agcSpeedList[agcSpeedToList[radioAConfig.agcSpeed]]);
 	}
 	else {
-		strcpy(analogBarButtons[3].text, agcSpeedList[agcSpeedToList[agcSpeedB]]);
+		strcpy(analogBarButtons[3].text, agcSpeedList[agcSpeedToList[radioBConfig.agcSpeed]]);
 	}
 
 	//RX bandwidth Select Button
@@ -448,10 +448,10 @@ void AnalogBarInit() {
 
 	uint32_t bandwidth = 0;
 	if(selectedRadio == RADIO_A) {
-		bandwidth = bandwidthA;
+		bandwidth = radioAConfig.bandwidth;
 	}
 	else {
-		bandwidth = bandwidthB;
+		bandwidth = radioBConfig.bandwidth;
 	}
 	uint16_t kilo = bandwidth / 1000;
 	uint16_t hundred = bandwidth % 1000;
@@ -527,17 +527,17 @@ uint8_t AnalogBarAction(uint8_t selected) {
 				radioModeList[1] = "RX";
 				radioModeList[2] = "TX";
 				if(selectedRadio == RADIO_A) {
-					operationModeA = DrawDropDown(position, 36, radioModeList, 3, operationModeA);
-					strcpy(analogBarButtons[0].text, radioModeList[operationModeA]);
+					radioAConfig.operationMode = DrawDropDown(position, 36, radioModeList, 3, radioAConfig.operationMode);
+					strcpy(analogBarButtons[0].text, radioModeList[radioAConfig.operationMode]);
 
 					//Send Command to VUHRadio
 					uint16_t txLength = 0;
 					uint8_t txData[512];
-					if(operationModeA == RadioMode_RX) {
+					if(radioAConfig.operationMode == RadioMode_RX) {
 						txLength = sprintf(txData, "FR01;");
 
 					}
-					else if(operationModeA == RadioMode_TX) {
+					else if(radioAConfig.operationMode == RadioMode_TX) {
 						txLength = sprintf(txData, "FT01;");
 					}
 					else {
@@ -547,17 +547,17 @@ uint8_t AnalogBarAction(uint8_t selected) {
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					operationModeB = DrawDropDown(position, 36, radioModeList, 3, operationModeB);
-					strcpy(analogBarButtons[0].text, radioModeList[operationModeB]);
+					radioBConfig.operationMode = DrawDropDown(position, 36, radioModeList, 3, radioBConfig.operationMode);
+					strcpy(analogBarButtons[0].text, radioModeList[radioBConfig.operationMode]);
 
 					//Send Command to VUHRadio
 					uint16_t txLength = 0;
 					uint8_t txData[512];
-					if(operationModeA == RadioMode_RX) {
+					if(radioBConfig.operationMode == RadioMode_RX) {
 						txLength = sprintf(txData, "FR01;");
 
 					}
-					else if(operationModeA == RadioMode_TX) {
+					else if(radioBConfig.operationMode == RadioMode_TX) {
 						txLength = sprintf(txData, "FT01;");
 					}
 					else {
@@ -582,22 +582,22 @@ uint8_t AnalogBarAction(uint8_t selected) {
 				modulationModeList[7] = "BPSK";
 				modulationModeList[8] = "QPSK";
 				if(selectedRadio == RADIO_A) {
-					modulationA = DrawDropDown(position, 44, modulationModeList, 9, (modulationA - 1)) + 1;
-					strcpy(analogBarButtons[1].text, modulationModeList[modulationA - 1]);
+					radioAConfig.modulation = DrawDropDown(position, 44, modulationModeList, 9, (radioAConfig.modulation - 1)) + 1;
+					strcpy(analogBarButtons[1].text, modulationModeList[radioAConfig.modulation - 1]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "MD0%01d;", modulationA);
+					uint16_t txLength = sprintf(txData, "MD0%01d;", radioAConfig.modulation);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					modulationB = DrawDropDown(position, 44, modulationModeList, 9, (modulationB - 1)) + 1;
-					strcpy(analogBarButtons[1].text, modulationModeList[modulationB - 1]);
+					radioBConfig.modulation = DrawDropDown(position, 44, modulationModeList, 9, (radioBConfig.modulation - 1)) + 1;
+					strcpy(analogBarButtons[1].text, modulationModeList[radioBConfig.modulation - 1]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "MD1%01d;", modulationB);
+					uint16_t txLength = sprintf(txData, "MD1%01d;", radioBConfig.modulation);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -607,20 +607,20 @@ uint8_t AnalogBarAction(uint8_t selected) {
 				position.x = 68;
 				position.y = 32;
 				if(selectedRadio == RADIO_A) {
-					afcRangeA = DrawUpDown(position, 0, 100000, afcRangeA);
+					radioAConfig.afcRange = DrawUpDown(position, 0, 100000, radioAConfig.afcRange);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "AF0%06d;", afcRangeA);
+					uint16_t txLength = sprintf(txData, "AF0%06d;", radioAConfig.afcRange);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					afcRangeB = DrawUpDown(position, 0, 100000, afcRangeB);
+					radioBConfig.afcRange = DrawUpDown(position, 0, 100000, radioBConfig.afcRange);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "AF1%06d;", afcRangeB);
+					uint16_t txLength = sprintf(txData, "AF1%06d;", radioBConfig.afcRange);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -644,22 +644,22 @@ uint8_t AnalogBarAction(uint8_t selected) {
 
 				uint8_t tmp = 0;
 				if(selectedRadio == RADIO_A) {
-					tmp = DrawDropDown(position, 74, agcSpeedList, 6, agcSpeedToList[agcSpeedA]);
-					agcSpeedA = agcListToSpeed[tmp];
+					tmp = DrawDropDown(position, 74, agcSpeedList, 6, agcSpeedToList[radioAConfig.agcSpeed]);
+					radioAConfig.agcSpeed = agcListToSpeed[tmp];
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "GT0%01d;", agcSpeedA);
+					uint16_t txLength = sprintf(txData, "GT0%01d;", radioAConfig.agcSpeed);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					tmp = DrawDropDown(position, 74, agcSpeedList, 6, agcSpeedToList[agcSpeedB]);
-					agcSpeedB = agcListToSpeed[tmp];
+					tmp = DrawDropDown(position, 74, agcSpeedList, 6, agcSpeedToList[radioBConfig.agcSpeed]);
+					radioBConfig.agcSpeed = agcListToSpeed[tmp];
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "GT1%01d;", agcSpeedB);
+					uint16_t txLength = sprintf(txData, "GT1%01d;", radioBConfig.agcSpeed);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -672,22 +672,22 @@ uint8_t AnalogBarAction(uint8_t selected) {
 
 				uint32_t bandwidth = 0;
 				if(selectedRadio == RADIO_A) {
-					bandwidthA = DrawUpDown(position, 0, 500000, bandwidthA);
-					bandwidth = bandwidthA;
+					radioAConfig.bandwidth = DrawUpDown(position, 0, 500000, radioAConfig.bandwidth);
+					bandwidth = radioAConfig.bandwidth;
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "SH0%06d;", bandwidthA);
+					uint16_t txLength = sprintf(txData, "SH0%06d;", radioAConfig.bandwidth);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					bandwidthB = DrawUpDown(position, 0, 500000, bandwidthB);
-					bandwidth = bandwidthB;
+					radioBConfig.bandwidth = DrawUpDown(position, 0, 500000, radioBConfig.bandwidth);
+					bandwidth = radioBConfig.bandwidth;
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "SH1%06d;", bandwidthB);
+					uint16_t txLength = sprintf(txData, "SH1%06d;", radioBConfig.bandwidth);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -747,10 +747,10 @@ void DigitalBarInit() {
 	char *radioCWList[1];
 	radioCWList[0] = "CW";
 	if(selectedRadio == RADIO_A) {
-		strcpy(digitalBarButtons[0].text, radioCWList[morseSpeedA]);
+		strcpy(digitalBarButtons[0].text, radioCWList[radioAConfig.morseSpeed]);
 	}
 	else {
-		strcpy(digitalBarButtons[0].text, radioCWList[morseSpeedB]);
+		strcpy(digitalBarButtons[0].text, radioCWList[radioBConfig.morseSpeed]);
 	}
 
 	//Bitrate Select Button
@@ -769,10 +769,10 @@ void DigitalBarInit() {
 
 	uint32_t txDatarate = 0;
 	if(selectedRadio == RADIO_A) {
-		txDatarate = txDatarateA;
+		txDatarate = radioAConfig.txDatarate;
 	}
 	else {
-		txDatarate = txDatarateB;
+		txDatarate = radioBConfig.txDatarate;
 	}
 
 	uint16_t kilo = txDatarate / 1000;
@@ -810,10 +810,10 @@ void DigitalBarInit() {
 	radioEncodeList[5] = "FM0";
 	radioEncodeList[6] = "MAN";
 	if(selectedRadio == RADIO_A) {
-		strcpy(digitalBarButtons[2].text, radioEncodeList[encoderA]);
+		strcpy(digitalBarButtons[2].text, radioEncodeList[radioAConfig.encoder]);
 	}
 	else {
-		strcpy(digitalBarButtons[2].text, radioEncodeList[encoderB]);
+		strcpy(digitalBarButtons[2].text, radioEncodeList[radioBConfig.encoder]);
 	}
 
 	//Framing Select Button
@@ -835,10 +835,10 @@ void DigitalBarInit() {
 	radioFramingList[1] = "HDLC";
 	radioFramingList[2] = "WMB";
 	if(selectedRadio == RADIO_A) {
-		strcpy(digitalBarButtons[3].text, radioFramingList[framingA]);
+		strcpy(digitalBarButtons[3].text, radioFramingList[radioAConfig.framing]);
 	}
 	else {
-		strcpy(digitalBarButtons[3].text, radioFramingList[framingB]);
+		strcpy(digitalBarButtons[3].text, radioFramingList[radioBConfig.framing]);
 	}
 
 	//CCITT/CRC bandwidth Select Button
@@ -862,10 +862,10 @@ void DigitalBarInit() {
 	radioCRCList[3] = "DNP";
 	radioCRCList[4] = "CRC32";
 	if(selectedRadio == RADIO_A) {
-		strcpy(digitalBarButtons[4].text, radioCRCList[crcA]);
+		strcpy(digitalBarButtons[4].text, radioCRCList[radioAConfig.crc]);
 	}
 	else {
-		strcpy(digitalBarButtons[4].text, radioCRCList[crcB]);
+		strcpy(digitalBarButtons[4].text, radioCRCList[radioBConfig.crc]);
 	}
 
 	//Select Button
@@ -928,22 +928,22 @@ uint8_t DigitalBarAction(uint8_t selected) {
 				radioCWList[0] = "CW";
 
 				if(selectedRadio == RADIO_A) {
-					morseSpeedA = DrawDropDown(position, 28, radioCWList, 1, morseSpeedA);
-					strcpy(digitalBarButtons[0].text, radioCWList[morseSpeedA]);
+					radioAConfig.morseSpeed = DrawDropDown(position, 28, radioCWList, 1, radioAConfig.morseSpeed);
+					strcpy(digitalBarButtons[0].text, radioCWList[radioAConfig.morseSpeed]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "KS0%01d;", morseSpeedA);
+					uint16_t txLength = sprintf(txData, "KS0%01d;", radioAConfig.morseSpeed);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					morseSpeedB = DrawDropDown(position, 28, radioCWList, 1, morseSpeedB);
-					strcpy(digitalBarButtons[0].text, radioCWList[morseSpeedB]);
+					radioBConfig.morseSpeed = DrawDropDown(position, 28, radioCWList, 1, radioBConfig.morseSpeed);
+					strcpy(digitalBarButtons[0].text, radioCWList[radioBConfig.morseSpeed]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "KS1%01d;", morseSpeedB);
+					uint16_t txLength = sprintf(txData, "KS1%01d;", radioBConfig.morseSpeed);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -954,40 +954,40 @@ uint8_t DigitalBarAction(uint8_t selected) {
 
 				uint32_t txDatarate = 0;
 				if(selectedRadio == RADIO_A) {
-					txDatarateA = DrawUpDown(position, 0, 500000, txDatarateA);
-					txDatarate = txDatarateA;
+					radioAConfig.txDatarate = DrawUpDown(position, 0, 500000, radioAConfig.txDatarate);
+					txDatarate = radioAConfig.txDatarate;
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "DT0%06d;", txDatarateA);
+					uint16_t txLength = sprintf(txData, "DT0%06d;", radioAConfig.txDatarate);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 
 					//Set RX to same datarate
 					Delay(100);
 
-					rxDatarateA = txDatarateA;
+					radioAConfig.rxDatarate = radioAConfig.txDatarate;
 					//Send Command to VUHRadio
-					txLength = sprintf(txData, "DR0%06d;", rxDatarateA);
+					txLength = sprintf(txData, "DR0%06d;", radioAConfig.rxDatarate);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					txDatarateB = DrawUpDown(position, 0, 500000, txDatarateB);
-					txDatarate = txDatarateB;
+					radioBConfig.txDatarate = DrawUpDown(position, 0, 500000, radioBConfig.txDatarate);
+					txDatarate = radioBConfig.txDatarate;
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "DT1%06d;", txDatarateB);
+					uint16_t txLength = sprintf(txData, "DT1%06d;", radioBConfig.txDatarate);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 
 					//Set RX to same datarate
 					Delay(100);
 
-					rxDatarateB = txDatarateB;
+					radioBConfig.rxDatarate = radioBConfig.txDatarate;
 					//Send Command to VUHRadio
-					txLength = sprintf(txData, "DR1%06d;", rxDatarateB);
+					txLength = sprintf(txData, "DR1%06d;", radioAConfig.rxDatarate);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -1018,22 +1018,22 @@ uint8_t DigitalBarAction(uint8_t selected) {
 				radioEncodeList[6] = "MAN";
 
 				if(selectedRadio == RADIO_A) {
-					encoderA = DrawDropDown(position, 48, radioEncodeList, 7, encoderA);
-					strcpy(digitalBarButtons[2].text, radioEncodeList[encoderA]);
+					radioAConfig.encoder = DrawDropDown(position, 48, radioEncodeList, 7, radioAConfig.encoder);
+					strcpy(digitalBarButtons[2].text, radioEncodeList[radioAConfig.encoder]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "EM0%01d;", encoderA);
+					uint16_t txLength = sprintf(txData, "EM0%01d;", radioAConfig.encoder);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					encoderB = DrawDropDown(position, 48, radioEncodeList, 7, encoderB);
-					strcpy(digitalBarButtons[2].text, radioEncodeList[encoderB]);
+					radioBConfig.encoder = DrawDropDown(position, 48, radioEncodeList, 7, radioBConfig.encoder);
+					strcpy(digitalBarButtons[2].text, radioEncodeList[radioBConfig.encoder]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "EM1%01d;", encoderB);
+					uint16_t txLength = sprintf(txData, "EM1%01d;", radioBConfig.encoder);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -1048,22 +1048,22 @@ uint8_t DigitalBarAction(uint8_t selected) {
 				radioFramingList[2] = "WMB";
 
 				if(selectedRadio == RADIO_A) {
-					framingA = DrawDropDown(position, 48, radioFramingList, 3, framingA);
-					strcpy(digitalBarButtons[3].text, radioFramingList[framingA]);
+					radioAConfig.framing = DrawDropDown(position, 48, radioFramingList, 3, radioAConfig.framing);
+					strcpy(digitalBarButtons[3].text, radioFramingList[radioAConfig.framing]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "FM0%01d;", framingA);
+					uint16_t txLength = sprintf(txData, "FM0%01d;", radioAConfig.framing);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					framingB = DrawDropDown(position, 48, radioFramingList, 3, framingB);
-					strcpy(digitalBarButtons[3].text, radioFramingList[framingB]);
+					radioBConfig.framing = DrawDropDown(position, 48, radioFramingList, 3, radioBConfig.framing);
+					strcpy(digitalBarButtons[3].text, radioFramingList[radioAConfig.framing]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "FM1%01d;", framingB);
+					uint16_t txLength = sprintf(txData, "FM1%01d;", radioAConfig.framing);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -1080,22 +1080,22 @@ uint8_t DigitalBarAction(uint8_t selected) {
 				radioCRCList[4] = "CRC32";
 
 				if(selectedRadio == RADIO_A) {
-					crcA = DrawDropDown(position, 54, radioCRCList, 5, crcA);
-					strcpy(digitalBarButtons[4].text, radioCRCList[crcA]);
+					radioAConfig.crc = DrawDropDown(position, 54, radioCRCList, 5, radioAConfig.crc);
+					strcpy(digitalBarButtons[4].text, radioCRCList[radioAConfig.crc]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "CT0%01d;", crcA);
+					uint16_t txLength = sprintf(txData, "CT0%01d;", radioAConfig.crc);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
 				else {
-					crcB = DrawDropDown(position, 54, radioCRCList, 5, crcB);
-					strcpy(digitalBarButtons[4].text, radioCRCList[crcB]);
+					radioBConfig.crc = DrawDropDown(position, 54, radioCRCList, 5, radioBConfig.crc);
+					strcpy(digitalBarButtons[4].text, radioCRCList[radioBConfig.crc]);
 
 					//Send Command to VUHRadio
 					uint8_t txData[512];
-					uint16_t txLength = sprintf(txData, "CT1%01d;", crcB);
+					uint16_t txLength = sprintf(txData, "CT1%01d;", radioBConfig.crc);
 					UART1Write(txData, txLength);
 					CommandBarUpdateCmd(txData);
 				}
@@ -1130,7 +1130,7 @@ void MainScreenDraw() {
 	position.y = 0;
 	size.x = 50;
 	size.y = 18;
-	if(selectedRadio == RADIO_UHF) {
+	if(selectedRadio == RADIO_A) {
 		position.x = 48;
 		sprintf(text, "VHF");
 		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.white, Colors666.purple, Colors666.silver);
@@ -1224,12 +1224,8 @@ void MainScreenDraw() {
 		position.x += 19;
 	}
 
-	//Bottom Main Menu/Screen delimiter bar
-	position.x = 0;
-	position.y = 122;
-	size.x = 240;
-	size.y = 2;
-	DrawRect(position, size, Colors666.white, 0, Colors666.white);
+	//Message Area/Box
+	MessageWindowInit();
 }
 
 void CenterFrequencyUpdate() {
@@ -1247,10 +1243,10 @@ void CenterFrequencyUpdate() {
 	//Re-Draw Center Frequency Label
 	uint32_t frequency = 0;
 	if(selectedRadio == RADIO_A) {
-		frequency = centerFrequencyA;
+		frequency = radioAConfig.centerFrequency;
 	}
 	else {
-		frequency = centerFrequencyB;
+		frequency = radioBConfig.centerFrequency;
 	}
 	sprintf(text, "%09lu", frequency);
 	position.x = 240 - strlen(text)*8*2 - 6;	//Right align text
@@ -1273,10 +1269,10 @@ void RSSIIndicatorUpdate() {
 	//Updated new RSSI Bar
 	float rssiBarPos = 0;
 	if(selectedRadio == RADIO_A) {
-		rssiBarPos = (120.0f + rssiTrackingA) / 120;
+		rssiBarPos = (120.0f + radioATracking.rssiTracking) / 120;
 	}
 	else {
-		rssiBarPos = (120.0f + rssiTrackingB) / 120;
+		rssiBarPos = (120.0f + radioBTracking.rssiTracking) / 120;
 	}
 
 	if(rssiBarPos > 1.0f) {
@@ -1326,10 +1322,10 @@ void BandwidthBarUpdate() {
 
 	uint8_t bandwidthLabel = 0;
 	if(selectedRadio == RADIO_A) {
-		bandwidthLabel = bandwidthA/1000;
+		bandwidthLabel = radioAConfig.bandwidth/1000;
 	}
 	else {
-		bandwidthLabel = bandwidthB/1000;
+		bandwidthLabel = radioBConfig.bandwidth/1000;
 	}
 	//Re-Draw RF Track Bar Labels tracking bar
 	position.x = 0 + 4;
@@ -1372,10 +1368,10 @@ void AFCBarUpdate() {
 	//Re-Draw AFC Range Bar
 	float afcBarSize = 0;
 	if(selectedRadio == RADIO_A) {
-		afcBarSize = ((2.0f * afcRangeA) / bandwidthA);
+		afcBarSize = ((2.0f * radioAConfig.afcRange) / radioAConfig.bandwidth);
 	}
 	else {
-		afcBarSize = ((2.0f * afcRangeB) / bandwidthB);
+		afcBarSize = ((2.0f * radioBConfig.afcRange) / radioBConfig.bandwidth);
 	}
 
 	if(afcBarSize > 1.0f) {
@@ -1430,10 +1426,10 @@ void FrequencyTrackingUpdate() {
 	//Re-Draw AFC Range Bar
 	float afcBarSize = 0;
 	if(selectedRadio == RADIO_A) {
-		afcBarSize = ((2.0f * afcRangeA) / bandwidthA);
+		afcBarSize = ((2.0f * radioAConfig.afcRange) / radioAConfig.bandwidth);
 	}
 	else {
-		afcBarSize = ((2.0f * afcRangeB) / bandwidthB);
+		afcBarSize = ((2.0f * radioBConfig.afcRange) / radioBConfig.bandwidth);
 	}
 
 	if(afcBarSize > 1.0f) {
@@ -1475,10 +1471,10 @@ void FrequencyTrackingUpdate() {
 	//Update new Frequency tracking bar
 	float dFreqBarPos = 0;
 	if(selectedRadio == RADIO_A) {
-		dFreqBarPos = 0.5f + ((float)rfFrequencyTrackingA / bandwidthA);
+		dFreqBarPos = 0.5f + ((float)radioATracking.rfFrequencyTracking / radioAConfig.bandwidth);
 	}
 	else {
-		dFreqBarPos = 0.5f + ((float)rfFrequencyTrackingB / bandwidthB);
+		dFreqBarPos = 0.5f + ((float)radioBTracking.rfFrequencyTracking / radioBConfig.bandwidth);
 	}
 
 	if(dFreqBarPos > 1.0f) {
@@ -1494,6 +1490,153 @@ void FrequencyTrackingUpdate() {
 	size.y = 9;
 	DrawRect(position, size, Colors666.lime, 0, Colors666.white); 	//Frequency shift indicator bar
 	freqTrackLastPosX = position.x;
+}
+
+void MessageWindowInit() {
+	Vector2D position;
+	Vector2D size;
+	char text[255];
+
+	//Draw Message Window Box
+	position.x = 0;
+	position.y = 136;
+	size.x = 240;
+	size.y = 152;
+	DrawRect(position, size, Colors666.black, 2, Colors666.white);
+
+	//Draw Message Type/Protocol
+	position.y = 140;
+	position.x = 4;
+	sprintf(text, "AX25");
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	//Draw Message Fixed Header Content, aka labels
+	position.y = 154;
+	position.x = 4;
+	sprintf(text, "SRC:");
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.green, Colors666.black);
+
+	position.x = 120;
+	sprintf(text, "DST:");
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.red, Colors666.black);
+
+	position.y = 168;
+	position.x = 4;
+	sprintf(text, "PID:");
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	position.x = 86;
+	sprintf(text, "CTL:");
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	position.x = 168;
+	sprintf(text, "LEN:");
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	//Draw Message Payload Label
+	position.y = 182;
+	position.x = 4;
+	sprintf(text, "Payload:");
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+}
+
+void MessageWindowUpdate(AX25Struct message) {
+	Vector2D position;
+	Vector2D size;
+	char text[255];
+
+	//Clear Message Window Box
+//	position.x = 2;
+//	position.y = 138;
+//	size.x = 236;
+//	size.y = 148;
+//	DrawRect(position, size, Colors666.black, 0, Colors666.white);
+
+	//Draw Message Header Content
+	position.y = 154;
+//	position.x = 4;
+//	sprintf(text, "SRC:");
+//	DrawASCIIText(position, text, strlen(text), 1, Colors666.green, Colors666.black);
+
+	position.x = 40;
+	sprintf(text, "%s", message.sourceAddress);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+//	position.x = 120;
+//	sprintf(text, "DST:");
+//	DrawASCIIText(position, text, strlen(text), 1, Colors666.red, Colors666.black);
+
+	position.x = 156;
+	sprintf(text, "%s", message.destinationAddress);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	position.y = 168;
+//	position.x = 4;
+//	sprintf(text, "PID:");
+//	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	position.x = 40;
+	sprintf(text, "0x%02x", message.pid);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+//	position.x = 86;
+//	sprintf(text, "CTL:");
+//	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	position.x = 122;
+	sprintf(text, "0x%02x", message.control);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+//	position.x = 168;
+//	sprintf(text, "LEN:");
+//	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	position.x = 212;
+	sprintf(text, "%03d", message.payloadLength);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	//Draw Message Payload Content
+//	position.y = 182;
+//	position.x = 4;
+//	sprintf(text, "Payload:");
+//	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	//Clear Message Payload Field/Area
+	position.x = 2;
+	position.y = 196;
+	size.x = 236;
+	size.y = 90;
+	DrawRect(position, size, Colors666.black, 0, Colors666.white);
+
+	position.y = 196;
+	position.x = 4;
+	uint8_t i = 0;
+	while(i < message.payloadLength) {
+		//Calculate remaining text length
+		uint8_t remaining = message.payloadLength - i;
+		//Check if remaining text is more then can fit on one line (29 characters)
+		if(remaining > 29) {
+			//Write full line
+			DrawASCIIText(position, &message.payload[i], 29, 1, Colors666.white, Colors666.black);
+
+			position.y += 14;
+
+			i += 29;
+		}
+		else {
+			//Write partial line
+			DrawASCIIText(position, &message.payload[i], remaining, 1, Colors666.white, Colors666.black);
+
+			position.y += 14;
+
+			i += remaining;
+		}
+
+		//Check for bottom drawing limit
+		if(position.y > 270) {
+			break;
+		}
+	}
 }
 
 void CommandBarInit() {
@@ -1597,10 +1740,10 @@ void CenterFrequencyUpDown() {
 
 	//Draw Initial Selection
 	if(selectedRadio == RADIO_A) {
-		value = GetNumberAtIndex(centerFrequencyA, selectedNum);
+		value = GetNumberAtIndex(radioAConfig.centerFrequency, selectedNum);
 	}
 	else {
-		value = GetNumberAtIndex(centerFrequencyB, selectedNum);
+		value = GetNumberAtIndex(radioBConfig.centerFrequency, selectedNum);
 	}
 	sprintf(text, "%lu", value);
 	position.x = 240 - 6 - 8*2*(selectedNum + 1);
@@ -1611,10 +1754,10 @@ void CenterFrequencyUpDown() {
 		if(ReadButtonState(BUTTON_LEFT) == 0x01) {
 			//First Clear previous selected number
 			if(selectedRadio == RADIO_A) {
-				value = GetNumberAtIndex(centerFrequencyA, selectedNum);
+				value = GetNumberAtIndex(radioAConfig.centerFrequency, selectedNum);
 			}
 			else {
-				value = GetNumberAtIndex(centerFrequencyB, selectedNum);
+				value = GetNumberAtIndex(radioBConfig.centerFrequency, selectedNum);
 			}
 			sprintf(text, "%lu", value);
 			position.x = 240 - 6 - 8*2*(selectedNum + 1);
@@ -1629,10 +1772,10 @@ void CenterFrequencyUpDown() {
 
 			//Draw new selected number
 			if(selectedRadio == RADIO_A) {
-				value = GetNumberAtIndex(centerFrequencyA, selectedNum);
+				value = GetNumberAtIndex(radioAConfig.centerFrequency, selectedNum);
 			}
 			else {
-				value = GetNumberAtIndex(centerFrequencyB, selectedNum);
+				value = GetNumberAtIndex(radioBConfig.centerFrequency, selectedNum);
 			}
 			sprintf(text, "%lu", value);
 			position.x = 240 - 6 - 8*2*(selectedNum + 1);
@@ -1642,10 +1785,10 @@ void CenterFrequencyUpDown() {
 		else if(ReadButtonState(BUTTON_RIGHT) == 0x01) {
 			//First Clear previous selected number
 			if(selectedRadio == RADIO_A) {
-				value = GetNumberAtIndex(centerFrequencyA, selectedNum);
+				value = GetNumberAtIndex(radioAConfig.centerFrequency, selectedNum);
 			}
 			else {
-				value = GetNumberAtIndex(centerFrequencyB, selectedNum);
+				value = GetNumberAtIndex(radioBConfig.centerFrequency, selectedNum);
 			}
 			sprintf(text, "%lu", value);
 			position.x = 240 - 6 - 8*2*(selectedNum + 1);
@@ -1660,10 +1803,10 @@ void CenterFrequencyUpDown() {
 
 			//Draw new selected number
 			if(selectedRadio == RADIO_A) {
-				value = GetNumberAtIndex(centerFrequencyA, selectedNum);
+				value = GetNumberAtIndex(radioAConfig.centerFrequency, selectedNum);
 			}
 			else {
-				value = GetNumberAtIndex(centerFrequencyB, selectedNum);
+				value = GetNumberAtIndex(radioBConfig.centerFrequency, selectedNum);
 			}
 			sprintf(text, "%lu", value);
 			position.x = 240 - 6 - 8*2*(selectedNum + 1);
@@ -1678,10 +1821,10 @@ void CenterFrequencyUpDown() {
 			}
 
 			if(selectedRadio == RADIO_A) {
-				centerFrequencyA = SetNumberAtIndex(centerFrequencyA, selectedNum, value);
+				radioAConfig.centerFrequency = SetNumberAtIndex(radioAConfig.centerFrequency, selectedNum, value);
 			}
 			else {
-				centerFrequencyB = SetNumberAtIndex(centerFrequencyB, selectedNum, value);
+				radioBConfig.centerFrequency = SetNumberAtIndex(radioBConfig.centerFrequency, selectedNum, value);
 			}
 
 			//Draw new selected number
@@ -1698,10 +1841,10 @@ void CenterFrequencyUpDown() {
 			}
 
 			if(selectedRadio == RADIO_A) {
-				centerFrequencyA = SetNumberAtIndex(centerFrequencyA, selectedNum, value);
+				radioAConfig.centerFrequency = SetNumberAtIndex(radioAConfig.centerFrequency, selectedNum, value);
 			}
 			else {
-				centerFrequencyB = SetNumberAtIndex(centerFrequencyB, selectedNum, value);
+				radioBConfig.centerFrequency = SetNumberAtIndex(radioBConfig.centerFrequency, selectedNum, value);
 			}
 
 			//Draw new selected number
@@ -1714,20 +1857,20 @@ void CenterFrequencyUpDown() {
 			//EXIT or CENTER Button pressed
 			//Clear previous selected number
 			if(selectedRadio == RADIO_A) {
-				value = GetNumberAtIndex(centerFrequencyA, selectedNum);
+				value = GetNumberAtIndex(radioAConfig.centerFrequency, selectedNum);
 
 				//Send Command to VUHRadio
 				uint8_t txData[512];
-				uint16_t txLength = sprintf(txData, "FA%09d;", centerFrequencyA);
+				uint16_t txLength = sprintf(txData, "FA%09d;", radioAConfig.centerFrequency);
 				UART1Write(txData, txLength);
 				CommandBarUpdateCmd(txData);
 			}
 			else {
-				value = GetNumberAtIndex(centerFrequencyB, selectedNum);
+				value = GetNumberAtIndex(radioBConfig.centerFrequency, selectedNum);
 
 				//Send Command to VUHRadio
 				uint8_t txData[512];
-				uint16_t txLength = sprintf(txData, "FB%09d;", centerFrequencyB);
+				uint16_t txLength = sprintf(txData, "FB%09d;", radioBConfig.centerFrequency);
 				UART1Write(txData, txLength);
 				CommandBarUpdateCmd(txData);
 			}
