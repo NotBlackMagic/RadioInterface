@@ -9,17 +9,17 @@ extern "C" {
 
 #define RADIO_RSSI_THRESHOLD						-90		//Radio RSSI activity threshold, above this level channel activity is assumed (for Morse and LED indication)
 
-#define RADIO_A										0
-#define RADIO_B										1
+#define RADIO_A								0
+#define RADIO_B								1
 
-#define RADIO_A_XTAL								16000000	//Xtal Frequency in Hz of Radio A
-#define RADIO_B_XTAL								16000000	//Xtal Frequency in Hz of Radio A
+#define RADIO_A_XTAL						16000000	//Xtal Frequency in Hz of Radio A
+#define RADIO_B_XTAL						16000000	//Xtal Frequency in Hz of Radio A
 
-#define RADIO_A_FREQ_MAX							437000000
-#define RADIO_A_FREQ_MIN							435000000
+#define RADIO_A_FREQ_MAX					437000000
+#define RADIO_A_FREQ_MIN					435000000
 
-#define RADIO_B_FREQ_MAX							147000000
-#define RADIO_B_FREQ_MIN							145000000
+#define RADIO_B_FREQ_MAX					147000000
+#define RADIO_B_FREQ_MIN					145000000
 
 typedef enum {
 	RadioMode_OFF = 0,
@@ -74,11 +74,10 @@ typedef struct {
 	uint32_t radioXTAL;					//Xtal Frequency in Hz
 	uint32_t radioCenterFrequencyMin;	//Min RF Center Frequency
 	uint32_t radioCenterFrequencyMax;	//Max RF Center Frequency
+	int8_t radioRSSIOffset;				//Calibrate RSSI: Compensate for Board effects
 } RadioBaseConfigs;
 
 typedef struct {
-	//Base Radio Configs Module
-	RadioBaseConfigs baseConfigs;
 	//Basic, shared for all modulations
 	RadioMode operationMode;		//0-> Off, 1-> RX, 2-> TX
 	uint32_t centerFrequency;		//Hz
@@ -113,82 +112,18 @@ typedef struct {
 } RadioTrackingStruct;
 
 //Radio A (UHF) Configurations
-volatile RadioConfigsStruct radioAConfig;
+extern volatile RadioBaseConfigs radioABaseConfigs;			//Base Radio Configs Module
+extern volatile RadioConfigsStruct radioAConfig;
 
 //Tracking Variables
-volatile RadioTrackingStruct radioATracking;
+extern volatile RadioTrackingStruct radioATracking;
 
 //Radio B (UHF) Configurations
-volatile RadioConfigsStruct radioBConfig;
+extern volatile RadioBaseConfigs radioBBaseConfigs;			//Base Radio Configs Module
+extern volatile RadioConfigsStruct radioBConfig;
 
 //Tracking Variables
-volatile RadioTrackingStruct radioBTracking;
-
-////Radio A (UHF) Configurations
-////Basic, shared for all modulations
-//volatile RadioMode operationModeA;		//0-> Off, 1-> RX, 2-> TX
-//volatile uint32_t centerFrequencyA;		//Hz
-//volatile RadioModulation modulationA;	//1: AM; 2: FM; 3: AFSK; 4: ASK; 5: FSK; 6: GMSK; 7: 4-FSK; 8: BPSK; 9: QPSK;
-//volatile uint32_t ifFrequencyA;			//Hz
-//volatile uint32_t bandwidthA;			//Hz
-//volatile uint32_t txDatarateA;			//bit/s
-//volatile uint32_t rxDatarateA;			//bit/s
-//volatile uint32_t afcRangeA;			//Hz
-//volatile uint8_t outputPowerA;			//1dBm step, 0: -10dBm -> 26: 16 dBm
-//volatile uint8_t agcSpeedA;				//0: 79577Hz; 1: 59683Hz; 2: 34815Hz; 3: 18651Hz; 4: 9636Hz; 5: 4896Hz; 6: 2467Hz; 7: 1239Hz; 8: 620Hz; 9: 311Hz; 10: 155Hz; 11: 78Hz; 12: 39Hz; 13: 19Hz; 14: 10Hz; 15: OFF
-//
-////Special for FSK
-//volatile uint32_t frequencyDeviationA;	//Hz
-//
-////Special for AFSK
-//volatile uint16_t afskSpaceA;			//Hz
-//volatile uint16_t afskMarkA;			//Hz
-//volatile uint16_t afskDetectorBWA;		//Hz
-//
-////Special for Morse
-//volatile uint8_t morseSpeedA;			//WPM (0-> Off)
-//
-////Digital Packet Settings
-//volatile RadioEncoder encoderA;			//0: NRZ; 1: NRZ-S; 2: NRZI; 3: NRZI-S; 4: FM1; 5: FM0; 6: Manchester
-//volatile RadioFraming framingA;			//0: RAW; 1: HDLC; 2: Wireless M-Bus
-//volatile RadioCRC crcA;					//0: OFF; 1: CCITT; 2: CRC16; 3: DNP; 4: CRC32
-//
-////Tracking Variables
-//volatile int8_t rssiTrackingA;			//RSSI in signed format
-//volatile int32_t rfFrequencyTrackingA;	//Tracking in signed format and counts not Hz
-
-////Radio B (UHF) Configurations
-////Basic, shared for all modulations
-//volatile RadioMode operationModeB;		//0-> Off, 1-> RX, 2-> TX
-//volatile uint32_t centerFrequencyB;		//Hz
-//volatile RadioModulation modulationB;	//1: AM; 2: FM; 3: AFSK; 4: ASK; 5: FSK; 6: GMSK; 8: BPSK; 9: QPSK;
-//volatile uint32_t ifFrequencyB;			//Hz
-//volatile uint32_t bandwidthB;			//Hz
-//volatile uint32_t txDatarateB;			//bit/s
-//volatile uint32_t rxDatarateB;			//bit/s
-//volatile uint32_t afcRangeB;			//Hz
-//volatile uint8_t outputPowerB;			//1dBm step, 0: -10dBm -> 26: 16 dBm
-//volatile uint8_t agcSpeedB;				//0: 79577Hz; 1: 59683Hz; 2: 34815Hz; 3: 18651Hz; 4: 9636Hz; 5: 4896Hz; 6: 2467Hz; 7: 1239Hz; 8: 620Hz; 9: 311Hz; 10: 155Hz; 11: 78Hz; 12: 39Hz; 13: 19Hz; 14: 10Hz; 15: 5Hz
-//
-////Special for FSK
-//volatile uint32_t frequencyDeviationB;	//Hz
-//
-////Special for AFSK
-//volatile uint16_t afskSpaceB;			//Hz
-//volatile uint16_t afskMarkB;			//Hz
-//volatile uint16_t afskDetectorBWB;		//Hz
-//
-////Special for Morse
-//volatile uint8_t morseSpeedB;			//WPM (0-> Off)
-//
-////Digital Packet Settings
-//volatile RadioEncoder encoderB;			//0: NRZ; 1: NRZI; 2: FM1; 3: FM0; 4: Manchester
-//volatile RadioFraming framingB;			//0: Raw; 1: HDLC; 3: WM-Bus
-//volatile RadioCRC crcB;					//0: Off; 1: CCITT; 2: CRC16; 3: DNP; 4: CRC32
-//
-////Tracking Variables
-//volatile int8_t rssiTrackingB;			//RSSI in signed format
-//volatile int32_t rfFrequencyTrackingB;	//Tracking in signed format and counts not Hz
+extern volatile RadioTrackingStruct radioBTracking;
 
 #ifdef __cplusplus
 }

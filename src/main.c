@@ -119,6 +119,10 @@ int main(void) {
 						rxRadioData[rxRadioDataLength++] = rxData[i++];
 					}
 
+					//Add dummy CRC, needed for AX25Decode and not provided over the KISS protocol
+					rxRadioData[rxRadioDataLength++] = 0x00;
+					rxRadioData[rxRadioDataLength++] = 0x00;
+
 					//Convert to AX25 message
 					uint8_t ax25Payload[255];
 					AX25Struct ax25Message;
@@ -201,7 +205,7 @@ int main(void) {
 			digitalBarSelected = DigitalBarAction(digitalBarSelected);
 		}
 
-		if((timestamp + 500) < GetSysTick()) {
+		if((timestamp + 100) < GetSysTick()) {
 			//Update GUI
 			if(requestDataIndex == 0x00) {
 				RSSIIndicatorUpdate();
