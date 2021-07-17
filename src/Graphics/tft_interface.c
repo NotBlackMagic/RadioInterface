@@ -102,33 +102,35 @@ void TFTInitSPI() {
 }
 
 void TFTWriteSPI(uint8_t data) {
-	GPIOWrite(GPIO_OUT_LCD_nCS, 0x00);		//CS Low
+//	GPIOWrite(GPIO_OUT_LCD_nCS, 0x00);		//CS Low
 
-	SPI1ReadWrite(data);
+//	SPI1Write(data);
+	LL_SPI_TransmitData8(SPI1, data);
 
-	GPIOWrite(GPIO_OUT_LCD_nCS, 0x01);		//CS High
+//	GPIOWrite(GPIO_OUT_LCD_nCS, 0x01);		//CS High
 }
 
 uint8_t TFTReadSPI(void) {
-	uint8_t data = 0;
+//	GPIOWrite(GPIO_OUT_LCD_nCS, 0x00);		//CS Low
 
-	GPIOWrite(GPIO_OUT_LCD_nCS, 0x00);		//CS Low
+	LL_SPI_TransmitData8(SPI1, 0xFF);
+	while(!LL_SPI_IsActiveFlag_RXNE(SPI1));
+	return LL_SPI_ReceiveData8(SPI1);
 
-	data = SPI1ReadWrite(0xFF);
-
-	GPIOWrite(GPIO_OUT_LCD_nCS, 0x01);		//CS High
-
-	return data;
+//	GPIOWrite(GPIO_OUT_LCD_nCS, 0x01);		//CS High
 }
 
 void TFTCommandSPI(uint8_t data) {
+	//High pulse to cancel/exit previous possible read/write mode
+	GPIOWrite(GPIO_OUT_LCD_nCS, 0x01);		//CS High
 	GPIOWrite(GPIO_OUT_LCD_nCS, 0x00);		//CS Low
 
 	GPIOWrite(GPIO_OUT_LCD_RS, 0x00);		//D/CX Low
 
-	SPI1ReadWrite(data);
+	SPI1Write(data);
+	uint8_t dummy = SPI1Read();
 
 	GPIOWrite(GPIO_OUT_LCD_RS, 0x01);		//D/CX High
 
-	GPIOWrite(GPIO_OUT_LCD_nCS, 0x01);		//CS High
+//	GPIOWrite(GPIO_OUT_LCD_nCS, 0x01);		//CS High
 }

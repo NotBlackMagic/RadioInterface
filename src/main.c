@@ -1,5 +1,7 @@
 #include "gpio.h"
 #include "rcc.h"
+#include "stopwatch.h"
+#include "timer.h"
 #include "uart.h"
 
 #include "tft_commands.h"
@@ -26,6 +28,7 @@ int main(void) {
 
 	//Initialize all configured peripherals
 	GPIOInit();
+	StopwatchInit();
 	UART1Init(115200);
 
 	//Init TFT Screen
@@ -43,6 +46,11 @@ int main(void) {
 	//Init/get initial radio configurations
 	selectedRadio = RADIO_B;
 	RadioConfigInit();
+
+	//Init GUI Variables
+	uint8_t analogBarSelected = 0;
+	uint8_t digitalBarSelected = 0;
+	mainWindowSelected = MainWindow_Waterfall;
 
 	//Init Main Screen
 	MainScreenDraw();
@@ -83,9 +91,6 @@ int main(void) {
 //	sprintf(message.payload, "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG");
 //	message.payloadLength = strlen(message.payload);
 //	MessageWindowUpdate(message);
-
-	uint8_t analogBarSelected = 0;
-	uint8_t digitalBarSelected = 0;
 
 	uint32_t timestamp = GetSysTick();
 	uint8_t requestDataIndex = 0;
@@ -130,13 +135,13 @@ int main(void) {
 					AX25Decode(rxRadioData, rxRadioDataLength, &ax25Message);
 
 					//Write to correct Radio Window
-					if(kissPort == RADIO_A) {
-						if(selectedRadio == RADIO_A) {
+					if(kissPort == RADIO_A && selectedRadio == RADIO_A) {
+						if(mainWindowSelected == MainWindow_Msg) {
 							MessageWindowUpdate(ax25Message);
 						}
 					}
-					else if(kissPort == RADIO_B) {
-						if(selectedRadio == RADIO_B) {
+					else if(kissPort == RADIO_B && selectedRadio == RADIO_B) {
+						if(mainWindowSelected == MainWindow_Msg) {
 							MessageWindowUpdate(ax25Message);
 						}
 					}
@@ -195,7 +200,50 @@ int main(void) {
 		}
 
 		if(ReadButtonState(BUTTON_MENU) == 0x01) {
+			mainWindowSelected += 1;
+			if(mainWindowSelected > MainWindow_Waterfall) {
+				mainWindowSelected = MainWindow_None;
+			}
 
+			//Main Window Area/Box
+			switch(mainWindowSelected) {
+				case MainWindow_None: {
+					//Draw Blank Main Window Area
+					Vector2D position;
+					Vector2D size;
+
+					position.x = 0;
+					position.y = 136;
+					size.x = 240;
+					size.y = 152;
+					DrawRect(position, size, Colors666.black, 2, Colors666.white);
+					break;
+				}
+				case MainWindow_Msg: {
+					MessageWindowInit();
+					break;
+				}
+				case MainWindow_Spectrum: {
+					SpectrumWindowInit();
+					break;
+				}
+				case MainWindow_Waterfall: {
+					WaterfallWindowInit();
+					break;
+				}
+				default: {
+					//Draw Blank Main Window Area
+					Vector2D position;
+					Vector2D size;
+
+					position.x = 0;
+					position.y = 136;
+					size.x = 240;
+					size.y = 152;
+					DrawRect(position, size, Colors666.black, 2, Colors666.white);
+					break;
+				}
+			}
 		}
 
 		if(analogBarSelected != 0x00) {
@@ -205,20 +253,78 @@ int main(void) {
 			digitalBarSelected = DigitalBarAction(digitalBarSelected);
 		}
 
-		if((timestamp + 100) < GetSysTick()) {
-			//Update GUI
-			if(requestDataIndex == 0x00) {
-				RSSIIndicatorUpdate();
+		if((timestamp + 200) < GetSysTick()) {
+			//Invert received values: No idea why yet...
+			radioATracking.rfFrequencyTracking = -radioATracking.rfFrequencyTracking;
+			radioBTracking.rfFrequencyTracking = -radioBTracking.rfFrequencyTracking;
 
-				txLength = sprintf(txData, "RM%d0;", selectedRadio);		//Request RSSI Tracking Data
+			//Update GUI
+			RSSIIndicatorUpdate();
+			FrequencyTrackingUpdate();
+
+			if(mainWindowSelected == MainWindow_Waterfall || mainWindowSelected == MainWindow_Spectrum) {
+				//Get Data
+				//Use current frequency tracking value to add to waterfall
+				int8_t rssi;
+				float dFreqBarPos = 0;
+				if(selectedRadio == RADIO_A) {
+					dFreqBarPos = 0.5f + ((float)radioATracking.rfFrequencyTracking / radioAConfig.bandwidth);
+					rssi = radioATracking.rssiTracking;
+				}
+				else {
+					dFreqBarPos = 0.5f + ((float)radioBTracking.rfFrequencyTracking / radioBConfig.bandwidth);
+					rssi = radioBTracking.rssiTracking;
+				}
+				uint16_t pos = (uint16_t)(255 * dFreqBarPos);
+
+				if(dFreqBarPos > 1.0f) {
+					dFreqBarPos = 1.0f;
+				}
+				else if(dFreqBarPos < 0.0f) {
+					dFreqBarPos = 0.0f;
+				}
+
+				uint8_t spectrum[255];
+
+				uint16_t i;
+				for(i = 0; i < 255; i++) {
+					int16_t dPos = pos - i;
+					if(dPos < 0) {
+						dPos = -dPos;
+					}
+
+					int16_t value = 255 + (rssi * 2);
+					if(value < 0) {
+						value = 0;
+					}
+
+					value = value - (dPos << 3);
+					if(value < 0) {
+						value = 0;
+					}
+
+					spectrum[i] = (uint8_t)value;
+				}
+
+				if(mainWindowSelected == MainWindow_Spectrum) {
+					SpectrumWindowUpdate(spectrum, 255);
+				}
+				else {
+					WaterfallWindowUpdate(spectrum, 255);
+				}
+			}
+
+			//Request RSSI Tracking Data
+			//Switch between them, need time between CMD sent to Radio so it can respond to them
+			if(requestDataIndex == 0x00) {
+				txLength = sprintf(txData, "RM%d0;", selectedRadio);
 				UART1Write(txData, txLength);
 				CommandBarUpdateCmd(txData);
 
 				requestDataIndex = 0x01;
 			}
-			else if(requestDataIndex == 0x01) {
-				FrequencyTrackingUpdate();
-
+			else {
+				//Request RF Frequency Tracking Data
 				txLength = sprintf(txData, "RM%d1;", selectedRadio);		//Request RSSI Tracking Data
 				UART1Write(txData, txLength);
 				CommandBarUpdateCmd(txData);

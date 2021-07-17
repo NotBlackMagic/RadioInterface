@@ -11,12 +11,13 @@ Some characteristics of this firmware:
 - TNC style interface to the VUHFRadio uses the KISS protocol
 
 Current version is tested and works with:
-- For now only works with one of the Radio/Transceiver channels, the VHF
+- Switching between the two Radio/Transceiver channels, VHF and UHF
 - Loading of configurations on startup from the VUHFRadio Module
 - Update and display RSSI and RF Frequency tracking variables
-- Working menus for changing main analog domain and digital domain configurations, not yet sent back to the VUHFRadio module
+- Working menus for changing main analog domain and digital domain configurations and send the changes to the VUHFRadio module
 - Display last CAT command sent and return status
 - Decode and display AX.25 frames received from the VUHFRadio Module over the KISS protocol
+- A Waterfall window with vertical scrolling to show the history of the RSSI and RF Frequency tracking variables
 
 Detailed explanation on the RadioInterface Module and its usage: www.notblackmagic.com/projects/radio-interface/
 

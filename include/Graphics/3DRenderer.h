@@ -5,10 +5,6 @@
  extern "C" {
 #endif
 
-#define ARM_MATH_CM4
-
-#include "arm_math.h"
-
 #include "tft_gui.h"
 
 #include "math.h"

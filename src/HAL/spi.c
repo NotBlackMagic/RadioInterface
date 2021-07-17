@@ -113,6 +113,26 @@ uint8_t SPI1ReadWrite(uint8_t txByte) {
 }
 
 /**
+  * @brief	This function performs a single byte transfer on SPI1 (ONLY write 1 byte)
+  * @param	byte: Byte to be sent
+  * @return	None
+  */
+void SPI1Write(uint8_t byte) {
+//	while(!LL_SPI_IsActiveFlag_TXE(SPI1));
+	LL_SPI_TransmitData8(SPI1, byte);
+}
+
+/**
+  * @brief	This function reads a received byte on SPI1, needs a call to SPI1Write before
+  * @param	None
+  * @return	Received byte
+  */
+uint8_t SPI1Read() {
+	while(!LL_SPI_IsActiveFlag_RXNE(SPI1));
+	return LL_SPI_ReceiveData8(SPI1);
+}
+
+/**
   * @brief	This function performs a byte transfer on SPI2 (read and write 1 byte)
   * @param	txByte: Single Byte to be transmitted
   * @return	received single byte

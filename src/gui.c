@@ -10,6 +10,9 @@
 //Selected Radio
 volatile uint8_t selectedRadio;
 
+//GUI Variables
+MainWindowScreens mainWindowSelected;
+
 //Buttons check variables
 volatile uint32_t buttonDebounceTimer = 0;
 uint8_t button0State;			//UP
@@ -1133,18 +1136,18 @@ void MainScreenDraw() {
 	if(selectedRadio == RADIO_A) {
 		position.x = 48;
 		sprintf(text, "VHF");
-		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.white, Colors666.purple, Colors666.silver);
+		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.white, Colors666.purple, Colors666.gray);
 		position.x = 0;
 		sprintf(text, "UHF");
-		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.white, Colors666.blue, Colors666.white);
+		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.green, Colors666.blue, Colors666.white);
 	}
 	else {
 		position.x = 0;
 		sprintf(text, "UHF");
-		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.white, Colors666.blue, Colors666.silver);
+		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.white, Colors666.blue, Colors666.gray);
 		position.x = 48;
 		sprintf(text, "VHF");
-		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.white, Colors666.purple, Colors666.white);
+		DrawTextBox(position, size, 2, text, strlen(text), 1, Colors666.green, Colors666.purple, Colors666.white);
 	}
 
 	//Draw Screen Box
@@ -1224,8 +1227,34 @@ void MainScreenDraw() {
 		position.x += 19;
 	}
 
-	//Message Area/Box
-	MessageWindowInit();
+	//Main Window Area/Box
+	switch(mainWindowSelected) {
+		case MainWindow_None:
+			//Draw Blank Main Window Area
+			position.x = 0;
+			position.y = 136;
+			size.x = 240;
+			size.y = 152;
+			DrawRect(position, size, Colors666.black, 2, Colors666.white);
+			break;
+		case MainWindow_Msg:
+			MessageWindowInit();
+			break;
+		case MainWindow_Spectrum:
+			SpectrumWindowInit();
+			break;
+		case MainWindow_Waterfall:
+			WaterfallWindowInit();
+			break;
+		default:
+			//Draw Blank Main Window Area
+			position.x = 0;
+			position.y = 136;
+			size.x = 240;
+			size.y = 152;
+			DrawRect(position, size, Colors666.black, 2, Colors666.white);
+			break;
+	}
 }
 
 void CenterFrequencyUpdate() {
@@ -1636,6 +1665,344 @@ void MessageWindowUpdate(AX25Struct message) {
 		if(position.y > 270) {
 			break;
 		}
+	}
+}
+
+void SpectrumWindowInit() {
+	Vector2D position;
+	Vector2D size;
+	char text[255];
+
+	//Draw Window Box
+	position.x = 0;
+	position.y = 136;
+	size.x = 240;
+	size.y = 152;
+	DrawRect(position, size, Colors666.black, 2, Colors666.white);
+
+	//Draw Vertical Grid Lines
+	uint8_t i;
+	for(i = 1; i <= 7; i++) {
+		position.x = i*30;
+		position.y = 136;
+		size.x = 1;
+		size.y = 152;
+
+//		if(i == 4) {
+//			//Draw Center line thicker
+//			size.x = 2;
+//			DrawRect(position, size, Colors666.black, 2, Colors666.white);
+//		}
+//		else {
+//			DrawRect(position, size, Colors666.black, 1, Colors666.white);
+//		}
+
+		DrawRect(position, size, Colors666.black, 1, Colors666.white);
+	}
+
+	//Draw Horizontal Grid Lines
+	for(i = 1; i <= 4; i++) {
+		position.x = 0;
+		position.y = 136 + i*30;
+		size.x = 240;
+		size.y = 1;
+		DrawRect(position, size, Colors666.black, 1, Colors666.white);
+	}
+
+	//Draw/write Frequency labels on the top
+	uint16_t bandwidthLabel = 0;
+	if(selectedRadio == RADIO_A) {
+		bandwidthLabel = radioAConfig.bandwidth/1000;
+	}
+	else {
+		bandwidthLabel = radioBConfig.bandwidth/1000;
+	}
+
+	position.y = 140;
+	sprintf(text, "%u", (bandwidthLabel * 3 / 8));
+	uint8_t labelSize = strlen(text) * 8;
+	position.x = 31 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 2 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 61 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 1 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 91 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", 0);
+	position.x = 117;
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 1 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 151 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 2 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 181 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 3 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 211 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	//Draw/write dB labels on the right
+	position.x = 212;
+	position.y = 161;
+	sprintf(text, "%03u", 25);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	position.y = 191;
+	sprintf(text, "%03u", 50);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	position.y = 221;
+	sprintf(text, "%03u", 75);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	position.y = 251;
+	sprintf(text, "%03u", 100);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+}
+
+uint16_t previouseMag[255];
+void SpectrumWindowUpdate(uint8_t spectrum[], uint16_t length) {
+	Vector2D position;
+	Vector2D size;
+	char text[255];
+
+	//Spectrum Window Dimensions
+	position.x = 2;
+	position.y = 138;
+	size.x = 236;
+	size.y = 148;
+
+	Vector2D point;
+
+	//Update Spectrum: Remove old points and add new ones
+	uint8_t i;
+	for(i = position.x; i < size.x; i += 2) {
+		uint16_t index = (i * length) / (size.x - 2);
+		uint8_t rssiValue = (spectrum[index] * size.y) / 255;
+
+		//First clean/remove previous spectrum points
+		point.x = i;
+		if((point.x % 30) == 0x00) {
+			point.y = previouseMag[i];
+			SetPixel(point, Colors666.white);
+			point.y = previouseMag[i] + 1;
+			SetPixel(point, Colors666.white);
+		}
+		else {
+			point.y = previouseMag[i];
+			if(((point.y - 136) % 30) == 0x00) {
+				SetPixel(point, Colors666.white);
+			}
+			else {
+				SetPixel(point, Colors666.black);
+			}
+
+			point.y = previouseMag[i] + 1;
+			if(((point.y - 136) % 30) == 0x00) {
+				SetPixel(point, Colors666.white);
+			}
+			else {
+				SetPixel(point, Colors666.black);
+			}
+		}
+
+		point.x = i + 1;
+		if((point.x % 30) == 0x00) {
+			point.y = previouseMag[i];
+			SetPixel(point, Colors666.white);
+			point.y = previouseMag[i] + 1;
+			SetPixel(point, Colors666.white);
+		}
+		else {
+			point.y = previouseMag[i];
+			if(((point.y - 136) % 30) == 0x00) {
+				SetPixel(point, Colors666.white);
+			}
+			else {
+				SetPixel(point, Colors666.black);
+			}
+
+			point.y = previouseMag[i] + 1;
+			if(((point.y - 136) % 30) == 0x00) {
+				SetPixel(point, Colors666.white);
+			}
+			else {
+				SetPixel(point, Colors666.black);
+			}
+		}
+
+		//Then Add new Point
+		point.x = i;
+		point.y = (position.y + size.y - 2) - rssiValue;
+		SetPixel(point, Colors666.yellow);
+		point.x = i;
+		point.y = (position.y + size.y - 2) - rssiValue + 1;
+		SetPixel(point, Colors666.yellow);
+		point.x = i + 1;
+		point.y = (position.y + size.y - 2) - rssiValue + 1;
+		SetPixel(point, Colors666.yellow);
+		point.x = i + 1;
+		point.y = (position.y + size.y - 2) - rssiValue;
+		SetPixel(point, Colors666.yellow);
+
+		//Safe drawn point to be removed in the next function call
+		previouseMag[i] = (position.y + size.y - 2) - rssiValue;
+	}
+
+	//Draw/write Frequency labels on the top
+	uint16_t bandwidthLabel = 0;
+	if(selectedRadio == RADIO_A) {
+		bandwidthLabel = radioAConfig.bandwidth/1000;
+	}
+	else {
+		bandwidthLabel = radioBConfig.bandwidth/1000;
+	}
+
+	position.y = 140;
+	sprintf(text, "%u", (bandwidthLabel * 3 / 8));
+	uint8_t labelSize = strlen(text) * 8;
+	position.x = 31 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 2 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 61 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 1 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 91 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", 0);
+	position.x = 117;
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 1 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 151 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 2 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 181 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	sprintf(text, "%u", (bandwidthLabel * 3 / 8));
+	labelSize = strlen(text) * 8;
+	position.x = 211 - (labelSize >> 1);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+
+	//Draw/write dB labels on the right
+	position.x = 212;
+	position.y = 161;
+	sprintf(text, "%03u", 25);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	position.y = 191;
+	sprintf(text, "%03u", 50);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	position.y = 221;
+	sprintf(text, "%03u", 75);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+	position.y = 251;
+	sprintf(text, "%03u", 100);
+	DrawASCIIText(position, text, strlen(text), 1, Colors666.white, Colors666.black);
+}
+
+int16_t currentLine = 0;
+void WaterfallWindowInit() {
+	Vector2D position;
+	Vector2D size;
+
+	//Draw Window Box
+	position.x = 0;
+	position.y = 136;
+	size.x = 240;
+	size.y = 152;
+	DrawRect(position, size, Colors666.black, 2, Colors666.white);
+
+	//Reset current waterfall lien variable
+	currentLine = 0;
+
+	//Draw Spectrum Box
+//	position.x = 5;
+//	position.y = 142;
+//	size.x = 230;
+//	size.y = 136;
+//	DrawRect(position, size, Colors666.black, 2, Colors666.white);
+}
+
+void WaterfallWindowUpdate(uint8_t spectrum[], uint16_t length) {
+	Vector2D position;
+	Vector2D size;
+
+	//Waterfall Window Dimensions
+	position.x = 2;
+	position.y = 138;
+	size.x = 236;
+	size.y = 148;
+
+	//Scroll Area Up
+	//Invert Vertical draw direction to scroll down
+//	TFT_Command(MADCTL);
+//	TFT_Data(0x70);
+
+//	EnterVerticalScroll(position.y, size.y);
+//	VerticalScrollStep(position.y + 1);
+//	ExitVerticalScroll();
+
+	//Set Vertical draw direction back to normal
+//	TFT_Command(MADCTL);
+//	TFT_Data(0x60);
+
+	SetVerticalArea(position.x, (position.x + size.x));
+
+	uint16_t bufferLength = size.x * 3;
+	uint8_t buffer[bufferLength];
+	uint16_t j, p;
+	for(j = (position.y + size.y - 2); j >= position.y; j--) {
+		//Read line into buffer
+//		SetVerticalArea(position.x, (position.x + size.x));
+		SetHorizontalArea(j, j);
+		TFT_Command(RAMRD);
+		TFT_Read();					//Dummy write/read, as per datasheet
+		for(p = 0; p < size.x; p++) {
+			buffer[3*p + 0] = TFT_Read();
+			buffer[3*p + 1] = TFT_Read();
+			buffer[3*p + 2] = TFT_Read();
+		}
+
+		//Write line back to screen
+//		SetVerticalArea(position.x, (position.x + size.x));
+		SetHorizontalArea((j + 1), (j + 1));
+		TFT_Command(RAMWR);
+		for(p = 0; p < size.x; p++) {
+			TFT_Data(buffer[3*p + 0]);
+			TFT_Data(buffer[3*p + 1]);
+			TFT_Data(buffer[3*p + 2]);
+		}
+	}
+
+	//Prepare to draw area
+	SetVerticalArea(position.x, (position.x + size.x));
+	SetHorizontalArea((position.y), (position.y));
+	TFT_Command(RAMWR);
+
+	//Draw new Line
+	uint16_t i = 0;
+	for(i = 0; i < size.x; i++) {
+		uint16_t index = (i * length) / size.x;
+		uint8_t colorIndex = spectrum[index];
+
+		//Convert Power Value to a color
+		Color color = ValueToColorGradient((uint8_t)colorIndex);
+
+		//Draw new Waterfall line
+		TFT_Data(color.blue << 2);
+		TFT_Data(color.green << 2);
+		TFT_Data(color.red << 2);
+	}
+
+	currentLine += 1;
+	if(currentLine >= size.y) {
+		currentLine = 0;
 	}
 }
 

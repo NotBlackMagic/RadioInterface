@@ -54,16 +54,16 @@ void SoftwareReset() {
 }
 
 void ReadDisplayStatus() {
-  uint8_t data;
+	uint8_t data;
 
-  TFT_Command(RDDST);
+	TFT_Command(RDDST);
 
-  TFT_Data(NOP);
+	TFT_Data(NOP);
 
-  data = TFT_Read();
-  data = TFT_Read();
-  data = TFT_Read();
-  data = TFT_Read();
+	data = TFT_Read();
+	data = TFT_Read();
+	data = TFT_Read();
+	data = TFT_Read();
 }
 
 void ExitSleepMode() {
@@ -93,7 +93,7 @@ void SetPixel(Vector2D position, Color color) {
 }
 
 void EnterVerticalScroll(uint16_t startScrollArea, uint16_t scrollAreaLength) {
-	uint16_t endScrollArea = 480 - (startScrollArea + scrollAreaLength);
+	uint16_t endScrollArea = 320 - (startScrollArea + scrollAreaLength);
 
 	TFT_Command(VSCRDEF);
 	TFT_Data((uint8_t)(startScrollArea>>8));

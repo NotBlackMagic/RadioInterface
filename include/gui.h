@@ -23,8 +23,6 @@
 #define BUTTON_RIGHT						5
 #define BUTTON_CENTER						7
 
-extern volatile uint8_t selectedRadio;
-
 typedef struct {
 	//Button Status
 	uint8_t id;
@@ -41,6 +39,16 @@ typedef struct {
 	Color backgroundColor;
 	Color frameColor;
 } ButtonStruct;
+
+typedef enum {
+	MainWindow_None,
+	MainWindow_Msg,
+	MainWindow_Spectrum,
+	MainWindow_Waterfall
+} MainWindowScreens;
+
+extern volatile uint8_t selectedRadio;
+extern MainWindowScreens mainWindowSelected;
 
 uint8_t ReadButtonState(uint8_t button);
 void DrawButton(ButtonStruct button);
@@ -66,6 +74,12 @@ uint8_t DigitalBarAction(uint8_t selected);
 
 void MessageWindowInit();
 void MessageWindowUpdate(AX25Struct message);
+
+void SpectrumWindowInit();
+void SpectrumWindowUpdate(uint8_t spectrum[], uint16_t length);
+
+void WaterfallWindowInit();
+void WaterfallWindowUpdate(uint8_t spectrum[], uint16_t length);
 
 void CommandBarInit();
 void CommandBarUpdateCmd(char* cmd);

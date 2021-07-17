@@ -12,7 +12,9 @@
 
 void SPI1Init();
 uint8_t SPI1ReadWrite(uint8_t txByte);
-uint8_t SPI1Write(uint8_t* data, uint8_t length);
+void SPI1Write(uint8_t byte);
+uint8_t SPI1Read();
+
 void SPI2Init();
 uint8_t SPI2ReadWrite(uint8_t txByte);
 

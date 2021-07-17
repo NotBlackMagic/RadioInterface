@@ -52,6 +52,8 @@ extern ColorsStruct Colors666;
 
 Color ToRGB666Convertion(Color color);
 
+Color ValueToColorGradient(uint8_t index);
+
 void SetBackgroundColor(Color color);
 void DrawLine(Vector2D pointA, Vector2D pointB, Color color);
 void DrawRect(Vector2D position, Vector2D size, Color fillColor, uint8_t thickness, Color frameColor);

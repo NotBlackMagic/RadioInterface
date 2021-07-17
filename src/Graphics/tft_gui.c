@@ -56,6 +56,45 @@ Color ToRGB666Convertion(Color color) {
 }
 
 /**
+  * @brief	This function returns a color from a defined gradient
+  * @param	index: Value to get a color from the gradient
+  * @return	Returns the 18-Bit Color
+  */
+Color ValueToColorGradient(uint8_t index) {
+	Color gColor;
+
+	//Invert index: So that RED is 255 and BLUE is 0
+	index = 255 - index;
+
+	if(index < 64) {
+		//Iterate from RED to YELLOW
+		gColor.red = 0x3F;
+		gColor.green = index;
+		gColor.blue = 0x00;
+	}
+	else if(index < 128) {
+		//Iterate from YELLOW to GREEN
+		gColor.red = 0x3F - index;
+		gColor.green = 0x3F;
+		gColor.blue = 0x00;
+	}
+	else if(index < 192) {
+		//Iterate from GREEN to CYAN
+		gColor.red = 0x00;
+		gColor.green = 0x3F;
+		gColor.blue = index;
+	}
+	else {
+		//Iterate from CYAN to BLUE
+		gColor.red = 0x00;
+		gColor.green = 0x3F - index;
+		gColor.blue = 0x3F;
+	}
+
+	return gColor;
+}
+
+/**
   * @brief	This function sets the background, full screen, to a single color
   * @param	color: Color to set the background to (18-Bit Color)
   * @return	None
